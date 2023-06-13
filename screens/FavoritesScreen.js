@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { View, FlatList, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Avatar, ListItem } from 'react-native-elements';
-import Loading from '../commpoents/LoadingComponents';
+import Loading from '../components/LoadingComponent';
 import { baseUrl } from '../shared/baseUrl';
 import { SwipeRow } from 'react-native-swipe-list-view';
 import { toggleFavorite } from '../features/favorites/favoritesSlice';

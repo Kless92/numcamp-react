@@ -2,7 +2,7 @@ import { FlatList, Text, View } from 'react-native';
 import { Tile } from 'react-native-elements';
 import { useSelector } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
-import Loading from '../commpoents/LoadingComponents';
+import Loading from '../components/LoadingComponent';
 import * as Animatable from 'react-native-animatable';
 
 const DirectoryScreen = ({ navigation  }) => {
