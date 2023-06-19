@@ -1,9 +1,9 @@
-import { Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, StyleSheet, Text, View, Alert, ToastAndroid } from 'react-native';
 import Constants from 'expo-constants';
 import CampsiteInfoScreen from './CampsiteInfoScreen';
 import DirectoryScreen from './DirectoryScreen';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createDrawerNavigator, DrawerContentScrollView,  DrawerItemList} from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import HomeScreen from './HomeScreen';
 import AboutScreen from './AboutScreen';
 import ContactScreen from './ContactScreen';
@@ -19,7 +19,7 @@ import { fetchCampsites } from '../features/campsites/campsitesSlice';
 import { fetchPromotions } from '../features/promotions/promotionsSlice';
 import { fetchComments } from '../features/comments/commentsSlice';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/core';
-
+import NetInfo from '@react-native-community/netinfo';
 const Drawer = createDrawerNavigator();
 
 const screenOptions = {
@@ -29,12 +29,12 @@ const screenOptions = {
 
 const HomeNavigator = () => {
     const Stack = createStackNavigator();
-    return(
+    return (
         <Stack.Navigator screenOptions={screenOptions}>
             <Stack.Screen
                 name='Home'
                 component={HomeScreen}
-                options={({ navigation }) => ({ 
+                options={({ navigation }) => ({
                     title: 'Home',
                     headerLeft: () => (
                         <Icon
@@ -56,10 +56,10 @@ const DirectoryNavigator = () => {
         <Stack.Navigator initialRouteName='Directory'
             screenOptions={screenOptions}
         >
-            <Stack.Screen 
-                name='Directory' 
-                component={DirectoryScreen} 
-                options={({ navigation }) => ({ 
+            <Stack.Screen
+                name='Directory'
+                component={DirectoryScreen}
+                options={({ navigation }) => ({
                     title: 'Campsite DIrectory',
                     headerLeft: () => (
                         <Icon
@@ -88,7 +88,7 @@ const AboutNavigator = () => {
         <Stack.Navigator initialRouteName='About'
             screenOptions={screenOptions}
         >
-            <Stack.Screen 
+            <Stack.Screen
                 name='About'
                 component={AboutScreen}
                 options={({ navigation }) => ({
@@ -112,10 +112,10 @@ const ContactNavigator = () => {
         <Stack.Navigator initialRouteName='Contact'
             screenOptions={screenOptions}
         >
-            <Stack.Screen 
+            <Stack.Screen
                 name='Contact'
                 component={ContactScreen}
-                options={({ navigation }) => ({ 
+                options={({ navigation }) => ({
                     title: 'Contact Us',
                     headerLeft: () => (
                         <Icon
@@ -137,10 +137,10 @@ const ReservationNavigator = () => {
         <Stack.Navigator initialRouteName='Contact'
             screenOptions={screenOptions}
         >
-            <Stack.Screen 
+            <Stack.Screen
                 name='Reservation'
                 component={ReservationScreen}
-                options={({ navigation }) => ({ 
+                options={({ navigation }) => ({
                     title: 'Reservation Search',
                     headerLeft: () => (
                         <Icon
@@ -162,10 +162,10 @@ const FavoritesNavigator = () => {
         <Stack.Navigator initialRouteName='Contact'
             screenOptions={screenOptions}
         >
-            <Stack.Screen 
+            <Stack.Screen
                 name='Favorites'
                 component={FavoritesScreen}
-                options={({ navigation }) => ({ 
+                options={({ navigation }) => ({
                     title: 'Favorite Campsites',
                     headerLeft: () => (
                         <Icon
@@ -187,16 +187,16 @@ const LoginNavigator = () => {
         <Stack.Navigator initialRouteName='Contact'
             screenOptions={screenOptions}
         >
-            <Stack.Screen 
+            <Stack.Screen
                 name='Login'
                 component={LoginScreen}
-                options={({ navigation, route }) => ({ 
+                options={({ navigation, route }) => ({
                     headerTitle: getFocusedRouteNameFromRoute(route),
                     headerLeft: () => (
                         <Icon
                             name={
                                 getFocusedRouteNameFromRoute(route) ===
-                                'Register' ? 'user-plus' : 'sign-in'
+                                    'Register' ? 'user-plus' : 'sign-in'
                             }
                             type='font-awesome'
                             iconStyle={styles.stackIcon}
@@ -212,14 +212,14 @@ const LoginNavigator = () => {
 const CustomDrawerContent = (props) => (
     <DrawerContentScrollView {...props}>
         <View style={styles.drawerHeader}>
-            <View style={{ flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <Image source={logo} style={styles.drawerImage} />
             </View>
-            <View style={{ flex: 2}}>
+            <View style={{ flex: 2 }}>
                 <Text style={styles.drawerHeaderText}>NuCamp</Text>
             </View>
         </View>
-        <DrawerItemList {...props} labelStyle={{ fontWeight: 'bold'}}/>
+        <DrawerItemList {...props} labelStyle={{ fontWeight: 'bold' }} />
     </DrawerContentScrollView>
 )
 
@@ -232,21 +232,63 @@ const Main = () => {
         dispatch(fetchComments());
     }, [dispatch]);
 
+    useEffect (() => {
+        NetInfo.fetch().then((connectionInfo) => {
+            Platform.OS === 'ios'
+                ? Alert.alert('Initial Network Connectivity Type',
+                    connectionInfo.type)
+                : ToastAndroid.show(
+                    'Initial Network Connectivity Type: ' + connectionInfo.type,
+                    ToastAndroid.LONG
+                );
+        });
+
+        const unsubscribeNetInfo = NetInfo.addEventListener(
+            (connectionInfo) => {
+                handleConnectivityChange(connectionInfo);
+            }
+        )
+
+        return unsubscribeNetInfo;
+    }, []);
+
+    const handleConnectivityChange = (connectionInfo) => {
+        let connectionMsg = 'You are now connected to an active network.';
+        switch(connectionInfo.type){
+            case 'none':
+                connectionMsg = 'No network connetion is active.';
+                break;
+            case 'unknow':
+                connectionMsg = 'The network connection state is now unknown.';
+                break;
+            case 'cellular':
+                connectionMsg = 'You are now connected to cellular network.';
+                break;
+            case 'wifi':
+                connectionMsg = 'You are now connected to a WiFi network.';
+                break;
+        }
+        Platform.OS === 'ios'
+        ? Alert.alert('Connection change: ', connectionMsg)
+        : ToastAndroid.show(connectionMsg, ToastAndroid.LONG)
+    }
+
     return (
-        <View style={{ flex: 1, 
-                       paddingTop: 
-                        Platform.OS === 'ios' ? 0: Constants.statusBarHeight
-                    }}
+        <View style={{
+            flex: 1,
+            paddingTop:
+                Platform.OS === 'ios' ? 0 : Constants.statusBarHeight
+        }}
         >
             <Drawer.Navigator
                 initialRouteName='Home'
                 drawerContent={CustomDrawerContent}
-                drawerStyle={{ backgroundColor: '#CEC8FF'}}
+                drawerStyle={{ backgroundColor: '#CEC8FF' }}
             >
                 <Drawer.Screen
                     name='Login'
                     component={LoginNavigator}
-                    options={{ 
+                    options={{
                         drawerIcon: ({ color }) => (
                             <Icon
                                 name='sign-in'
@@ -261,7 +303,7 @@ const Main = () => {
                 <Drawer.Screen
                     name='Home'
                     component={HomeNavigator}
-                    options={{ 
+                    options={{
                         title: 'Home',
                         drawerIcon: ({ color }) => (
                             <Icon
@@ -277,7 +319,7 @@ const Main = () => {
                 <Drawer.Screen
                     name='Directory'
                     component={DirectoryNavigator}
-                    options={{ 
+                    options={{
                         title: 'Directory',
                         drawerIcon: ({ color }) => (
                             <Icon
@@ -293,7 +335,7 @@ const Main = () => {
                 <Drawer.Screen
                     name='ReserveCampsite'
                     component={ReservationNavigator}
-                    options={{ 
+                    options={{
                         title: 'Reserve Campsite',
                         drawerIcon: ({ color }) => (
                             <Icon
@@ -309,7 +351,7 @@ const Main = () => {
                 <Drawer.Screen
                     name='Favorites'
                     component={FavoritesNavigator}
-                    options={{ 
+                    options={{
                         title: 'My Favorites',
                         drawerIcon: ({ color }) => (
                             <Icon
@@ -325,7 +367,7 @@ const Main = () => {
                 <Drawer.Screen
                     name='About'
                     component={AboutNavigator}
-                    options={{ 
+                    options={{
                         title: 'About',
                         drawerIcon: ({ color }) => (
                             <Icon
@@ -341,7 +383,7 @@ const Main = () => {
                 <Drawer.Screen
                     name='Contact'
                     component={ContactNavigator}
-                    options={{ 
+                    options={{
                         title: 'Contact Us',
                         drawerIcon: ({ color }) => (
                             <Icon
