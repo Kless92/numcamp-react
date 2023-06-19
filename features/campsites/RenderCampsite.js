@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, PanResponder, Alert } from 'react-native';
+import { StyleSheet, Text, View, PanResponder, Alert, Share } from 'react-native';
 import { Card, Icon } from 'react-native-elements';
 import { baseUrl } from '../../shared/baseUrl';
 import { useRef } from 'react';
@@ -48,6 +48,19 @@ const RenderCampsite = (props) => {
 
     })
 
+    const shareCampsite = (title, message, url) => {
+        Share.share(
+            {
+                title,
+                message: `${title}:\n ${message}\n ${url}`,
+                url
+            },
+            {
+                dialogTitle: 'Share ' + title
+            }
+        );
+    };
+
     if (campsite) {
         return (
             <Animatable.View
@@ -60,7 +73,7 @@ const RenderCampsite = (props) => {
                 <Card containerStyle={ styles.cardRow}>
                     <Card.Image source={{ uri: baseUrl + campsite.image }}>
                         <View style={{ justifyContent: 'center', flex: 1}}>
-                            <Text styel={styles.cardText}>
+                            <Text style={styles.cardText}>
                                 {campsite.name}
                             </Text>
                         </View>
@@ -80,13 +93,25 @@ const RenderCampsite = (props) => {
                             }
                         />
                         <Icon
-                            name={'pencil'}
+                            name='pencil'
                             type='font-awesome'
                             color='#5637DD'
                             raised
                             reverse
                             onPress={() => props.onShowModal()}
-                        />              
+                        />
+                        <Icon
+                            name='share'
+                            type='font-awesome'
+                            color='#5637DD'
+                            raised
+                            reverse
+                            onPress={() => shareCampsite(
+                                campsite.name,
+                                campsite.description,
+                                baseUrl + campsite.image
+                            )}
+                        />          
                     </View>
                 </Card>
             </Animatable.View>
