@@ -24,7 +24,7 @@ const RenderCampsite = (props) => {
             if (isLeftSwipe(gestureState)) {
                 Alert.alert(
                     'Add Favorite',
-                    'Are you sure you wish to add ' + campsite.name + ' to faviorites?',
+                    'Are you sure you wish to add ' + campsite.name + ' to favorites?',
                     [
                         {
                             text: 'Cancel',
@@ -70,7 +70,7 @@ const RenderCampsite = (props) => {
                 ref={view}
                 {...panResponder.panHandlers}
             >
-                <Card containerStyle={ styles.cardRow}>
+                <Card containerStyle={ styles.cardContainer}>
                     <Card.Image source={{ uri: baseUrl + campsite.image }}>
                         <View style={{ justifyContent: 'center', flex: 1}}>
                             <Text style={styles.cardText}>
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     cardText: {
         textShowColor: 'rgba(0, 0, 0, 1)',
         textShadowOffset: { width: -1, height: 1},
-        textShadowRedius: 20,
+        textShadowRadius: 20,
         textAlign: 'center',
         color:'white',
         fontSize: 20

@@ -23,7 +23,7 @@ const ReservationScreen = () => {
         console.log('date: ', date.toLocaleDateString('en-US'));
         Alert.alert(
             'Begin Search?',
-            'Number of Campser: '+campers+'\nHike-In? '
+            'Number of Campers: '+campers+'\nHike-In? '
             +hikeIn+'\nDate: '+date.toLocaleDateString('en-US'),
             [
                 {
