@@ -4,6 +4,8 @@ import { CheckBox, Input, Button, Icon } from 'react-native-elements';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as SecureStore from 'expo-secure-store';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as MediaLibrary from 'expo-media-library';
 import { baseUrl } from '../shared/baseUrl';
 import logo from '../assets/images/logo.png';
 
@@ -142,17 +144,41 @@ const RegisterTab = () => {
         const cameraPermission =
             await ImagePicker.requestCameraPermissionsAsync();
 
-        if(cameraPermission.status === 'granted') {
-            const capturedImage =await ImagePicker.launchCameraAsync({
+        if (cameraPermission.status === 'granted') {
+            const capturedImage = await ImagePicker.launchCameraAsync({
                 allowsEditing: true,
-                aspect: [1, 1]
+                aspect: [1, 1],
+                
             });
+            
             if (capturedImage.assets) {
                 console.log(capturedImage.assets[0]);
-                setImageUrl(capturedImage.assets[0].uri);
+                processImage(capturedImage.assets[0].uri);
+                MediaLibrary.saveToLibraryAsync(capturedImage.assets[0].uri);
             }
         }
-    }
+    };
+
+    const processImage = async (imgUri) => {
+        const processedImage = await ImageManipulator.manipulateAsync(
+            imgUri,
+            [{ resize: { width: 400 }}], // something
+            {format: ImageManipulator.SaveFormat.PNG}, // something
+        );
+        console.log(processedImage);
+        setImageUrl(processedImage.uri) // something goes inside the ()
+    };
+
+    const getImageFromGallery = async () => {
+        const mediaLibraryPermissions = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (mediaLibraryPermissions.status === 'granted') {
+            const capturedImage = await ImagePicker.launchImageLibraryAsync();
+            if(capturedImage.assets) {
+                console.log(capturedImage.assets[0]);
+                processImage(capturedImage.assets[0].uri);
+            }
+        }
+    };
 
     return (
         <ScrollView>
@@ -163,7 +189,8 @@ const RegisterTab = () => {
                         loadingIndicatorSource={logo}
                         style={styles.image}
                     />
-                    <Button title='Camera' onPress={getImageFromCamera}/>
+                    <Button title='Camera' onPress={getImageFromCamera} />
+                    <Button title='Gallery' onPress={getImageFromGallery}/>
                 </View>
                 <Input
                     placeholder='Username'
@@ -309,7 +336,7 @@ const styles = StyleSheet.create({
         margin: 10
     },
     image: {
-        width: 60, 
+        width: 60,
         height: 60
     }
 });
